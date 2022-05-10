@@ -63,8 +63,19 @@ WSGI_APPLICATION = 'Mushroomyan.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mushroomyan',
+        'USER': 'root',
+        'PASSWORD': '927599',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        'OPTIONS': {
+            'sql_mode': 'traditional',
+            'isolation_level': "repeatable read",
+        },
+        'CHARSET': 'utf8',
+        'COLLATION': 'utf8_general_ci',
+        'COLLATION_CONNECTION': 'utf8_general_ci'
     }
 }
 
