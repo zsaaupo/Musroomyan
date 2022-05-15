@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Customer',
     'Stock',
+    'phonenumber_field',  # installed Phone number field
 ]
 
 MIDDLEWARE = [
