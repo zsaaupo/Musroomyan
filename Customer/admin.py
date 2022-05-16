@@ -8,4 +8,7 @@ class CustomerDataAdmin(admin.ModelAdmin):
         "phone_number",
         "email",
     ]
+    readonly_fields = [
+        "OTP"
+    ]
 admin.site.register(CustomerData, CustomerDataAdmin)

@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'Stock',
     'phonenumber_field',  # installed Phone number field
     'phonenumbers',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
