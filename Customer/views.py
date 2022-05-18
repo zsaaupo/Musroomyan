@@ -1,12 +1,55 @@
 from django.shortcuts import render
+
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+
 from .models import CustomerData
 
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 import random
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+def OTP_sender(to, subject, body):
+    sender_email = 'django2077@gmail.com'
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', '465')
+        server.ehlo()
+        server.login(sender_email, '2077dj007')
+
+        massage = MIMEMultipart()
+        massage['From'] = sender_email
+        massage['To'] = to
+        massage['Subject'] = subject
+
+        html = """
+        <html>
+            <head></head>
+            <body>
+        """
+        html += body
+        """
+            </body>
+        </html>
+        """
+
+        massage.attach(MIMEText(html, 'html'))
+        server.sendmail(
+            from_addr=sender_email,
+            to_addrs=to,
+            msg=massage.as_string()
+        )
+        print("OTP sent")
+    except Exception as ex:
+        print(str(ex))
+    finally:
+        if server != None:
+            server.quit()
 
 class SignUpAPI(CreateAPIView):
     permission_classes = []
@@ -67,6 +110,7 @@ class SignUpAPI(CreateAPIView):
                 customer.OTP = OTP_maker
                 customer.user = user
                 customer.save()
+                OTP_sender(data['email'], 'Your OTP', 'OTP : '+str(OTP_maker))
                 # new customer saved
 
                 result['status'] = HTTP_200_OK
