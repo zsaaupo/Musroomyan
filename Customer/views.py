@@ -1,8 +1,9 @@
+import json
 from django.shortcuts import render
 
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_203_NON_AUTHORITATIVE_INFORMATION, HTTP_226_IM_USED, HTTP_202_ACCEPTED, HTTP_406_NOT_ACCEPTABLE
 
 from .models import CustomerData
 
@@ -15,6 +16,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from threading import Thread
+
 
 def OTP_sender(to, subject, body):
     sender_email = 'django2077@gmail.com'
@@ -58,17 +60,19 @@ def OTP_sender(to, subject, body):
         if server != None:
             server.quit()
 
+
 def OTP_sender_thread(to, subject, body):
     Thread(target=OTP_sender, args=(to, subject, body)).start()
 
+
 class SignUpAPI(CreateAPIView):
     permission_classes = []
+
     def post(self, request):
         result = {}
-
         try:
-            #tring to get user data
-            data = request.data
+            # trying to get user data
+            data = request.data  # form data variable
             if 'full_name' not in data or data['full_name'] == '':
                 result['massage'] = "Name can not be null."
                 result['error'] = "Full name"
@@ -94,7 +98,7 @@ class SignUpAPI(CreateAPIView):
                 result['error'] = "Password"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
 
-            user = User.objects.filter(username=data['email']).first() #filtering user
+            user = User.objects.filter(username=data['email']).first()  # filtering user
 
             if user:
                 return Response("You already have an account")
@@ -130,3 +134,51 @@ class SignUpAPI(CreateAPIView):
         except Exception as ex:
             return Response(str(ex))
         return Response("True")
+
+
+class OTPCheckingAPI(CreateAPIView):
+    permission_classes = []
+
+    def put(self, request):
+        result = {}
+        try:
+            data = json.loads(request.body)  # load json body as data
+            if 'email' not in data or data['email'] == '':
+                result['massage'] = "Email can not be null."
+                result['error'] = "Email"
+                return Response(result, status=HTTP_400_BAD_REQUEST)
+            if 'OTP' not in data or data['OTP'] == '':
+                result['massage'] = "OTP can not be null."
+                result['error'] = "OTP"
+                return Response(result, status=HTTP_400_BAD_REQUEST)
+
+            user = User.objects.filter(username=data['email']).first()
+
+            if not user:
+                result['massage'] = "Please create an account"
+                return Response(result, status=HTTP_203_NON_AUTHORITATIVE_INFORMATION)
+
+            elif user.is_active:
+                result['massage'] = "You have already have an active account"
+                return Response(result, status=HTTP_226_IM_USED)
+
+            else:
+                customer = CustomerData.objects.filter(user=user).first()
+
+                if customer.OTP == data['OTP']:
+                    user.is_active = True
+                    user.save()
+                    customer.OTP = ''
+                    customer.save()
+                    result['massage'] = "Success."
+                    result['status'] = HTTP_202_ACCEPTED
+                    return Response(result)
+
+                else:
+                    result['status'] = HTTP_406_NOT_ACCEPTABLE
+                    result['massage'] = " OTP did not matched."
+                    result['error'] = "OTP"
+                    return Response(result)
+
+        except Exception as ex:
+            return Response(str(ex))
