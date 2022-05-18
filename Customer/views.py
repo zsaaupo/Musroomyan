@@ -3,12 +3,12 @@ from django.shortcuts import render
 
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_203_NON_AUTHORITATIVE_INFORMATION, HTTP_226_IM_USED, HTTP_202_ACCEPTED, HTTP_406_NOT_ACCEPTABLE
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_203_NON_AUTHORITATIVE_INFORMATION, HTTP_226_IM_USED, HTTP_202_ACCEPTED, HTTP_406_NOT_ACCEPTABLE, HTTP_401_UNAUTHORIZED, HTTP_201_CREATED, HTTP_422_UNPROCESSABLE_ENTITY,
 
 from .models import CustomerData
 
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 import random
 
 import smtplib
@@ -127,7 +127,7 @@ class SignUpAPI(CreateAPIView):
                 OTP_sender_thread(data['email'], 'Mushroomyan OTP', 'OTP : '+str(OTP_maker))
                 # new customer saved
 
-                result['status'] = HTTP_200_OK
+                result['status'] = HTTP_201_CREATED
                 result['massage'] = "Success"
                 result['email'] = data['email']
                 return Response(result)
@@ -179,6 +179,43 @@ class OTPCheckingAPI(CreateAPIView):
                     result['massage'] = " OTP did not matched."
                     result['error'] = "OTP"
                     return Response(result)
+
+        except Exception as ex:
+            return Response(str(ex))
+
+
+class SignInAPI(CreateAPIView):
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        result = {}
+
+        try:
+            data = json.loads(request.body)
+            if 'email' not in data or data['email'] == '':
+                result['massage'] = "Email can not be null."
+                result['error'] = "Email"
+                return Response(result, status=HTTP_400_BAD_REQUEST)
+            if 'password' not in data or data['password'] == '':
+                result['massage'] = "password can not be null."
+                result['error'] = "password"
+                return Response(result, status=HTTP_400_BAD_REQUEST)
+
+            user = User.objects.filter(username=data['email']).first()
+
+            if not user:
+                result['massage'] = "Please create an account first"
+                return Response(result, status=HTTP_203_NON_AUTHORITATIVE_INFORMATION)
+
+            # under development
+            elif not user.is_active:
+                result['massage'] = "Your account is not active please contact our helpline"
+                return Response(result, status=HTTP_422_UNPROCESSABLE_ENTITY)
+
+            else:
+                if not check_password(data['password'], user.password):
+                    result['massage'] = "Wrong password"
+                    return Response(result, status=HTTP_401_UNAUTHORIZED)
 
         except Exception as ex:
             return Response(str(ex))
