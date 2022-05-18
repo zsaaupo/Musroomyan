@@ -1,10 +1,11 @@
-import json
+from rest_framework.utils import json
 from django.shortcuts import render
 
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_203_NON_AUTHORITATIVE_INFORMATION, HTTP_226_IM_USED, HTTP_202_ACCEPTED, HTTP_406_NOT_ACCEPTABLE, HTTP_401_UNAUTHORIZED, HTTP_201_CREATED, HTTP_422_UNPROCESSABLE_ENTITY,
-from rest_framework.
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_203_NON_AUTHORITATIVE_INFORMATION, \
+    HTTP_226_IM_USED, HTTP_202_ACCEPTED, HTTP_406_NOT_ACCEPTABLE, HTTP_401_UNAUTHORIZED, HTTP_201_CREATED, \
+    HTTP_422_UNPROCESSABLE_ENTITY
 
 from .models import CustomerData
 
@@ -17,6 +18,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from threading import Thread
+
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def OTP_sender(to, subject, body):
@@ -77,7 +80,7 @@ class SignUpAPI(CreateAPIView):
             if 'full_name' not in data or data['full_name'] == '':
                 result['massage'] = "Name can not be null."
                 result['error'] = "Full name"
-                return Response(result, status= HTTP_400_BAD_REQUEST)
+                return Response(result, status=HTTP_400_BAD_REQUEST)
             if 'email' not in data or data['email'] == '':
                 result['massage'] = "Email can not be null."
                 result['error'] = "Email"
@@ -125,7 +128,7 @@ class SignUpAPI(CreateAPIView):
                 customer.OTP = OTP_maker
                 customer.user = user
                 customer.save()
-                OTP_sender_thread(data['email'], 'Mushroomyan OTP', 'OTP : '+str(OTP_maker))
+                OTP_sender_thread(data['email'], 'Mushroomyan OTP', 'OTP : ' + str(OTP_maker))
                 # new customer saved
 
                 result['status'] = HTTP_201_CREATED
@@ -202,7 +205,7 @@ class SignInAPI(CreateAPIView):
                 result['error'] = "password"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
 
-            user = User.objects.filter(username=data['email']).first()
+            user = User.objects.filter(username=data['email']).first()  # get user info for given email
 
             if not user:
                 result['massage'] = "Please create an account first"
@@ -217,6 +220,16 @@ class SignInAPI(CreateAPIView):
                 if not check_password(data['password'], user.password):
                     result['massage'] = "Wrong password"
                     return Response(result, status=HTTP_401_UNAUTHORIZED)
+
+                else:
+                    token = RefreshToken.for_user(user)
+                    token_data = {}
+                    token_data['user_name'] = user.username
+                    token_data['access'] = str(token.access_token)
+                    token_data['token'] = str(token)
+                    token_data['status'] = HTTP_200_OK
+
+                    return Response(token_data)
 
         except Exception as ex:
             return Response(str(ex))
