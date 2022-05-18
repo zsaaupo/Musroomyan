@@ -29,15 +29,15 @@ class SignUpAPI(CreateAPIView):
                 result['error'] = "Phone number"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
             if 'address' not in data or data['address'] == '':
-                result['massage'] = "Address number can not be null."
+                result['massage'] = "Address can not be null."
                 result['error'] = "Address"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
             if 'gender' not in data or data['gender'] == '':
-                result['massage'] = "Gender number can not be null."
+                result['massage'] = "Gender can not be null."
                 result['error'] = "Gender"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
             if 'password' not in data or data['password'] == '':
-                result['massage'] = "Password number can not be null."
+                result['massage'] = "Password can not be null."
                 result['error'] = "Password"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
 
