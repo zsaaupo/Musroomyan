@@ -31,6 +31,11 @@ def OTP_sender(to, subject, body):
         <html>
             <head></head>
             <body>
+            <div>
+                <h2>Welcome to Mushroomyan</h2>
+                <h4>Thanks for Sign Up...!</h4>
+                <h4>We can ensure that you can find best quality mushroom from us</h4>
+            </div>
         """
         html += body
         """
@@ -110,7 +115,7 @@ class SignUpAPI(CreateAPIView):
                 customer.OTP = OTP_maker
                 customer.user = user
                 customer.save()
-                OTP_sender(data['email'], 'Your OTP', 'OTP : '+str(OTP_maker))
+                OTP_sender(data['email'], 'Mushroomyan OTP', 'OTP : '+str(OTP_maker))
                 # new customer saved
 
                 result['status'] = HTTP_200_OK
