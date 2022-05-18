@@ -14,6 +14,8 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from threading import Thread
+
 def OTP_sender(to, subject, body):
     sender_email = 'django2077@gmail.com'
 
@@ -55,6 +57,9 @@ def OTP_sender(to, subject, body):
     finally:
         if server != None:
             server.quit()
+
+def OTP_sender_thread(to, subject, body):
+    Thread(target=OTP_sender, args=(to, subject, body)).start()
 
 class SignUpAPI(CreateAPIView):
     permission_classes = []
@@ -115,7 +120,7 @@ class SignUpAPI(CreateAPIView):
                 customer.OTP = OTP_maker
                 customer.user = user
                 customer.save()
-                OTP_sender(data['email'], 'Mushroomyan OTP', 'OTP : '+str(OTP_maker))
+                OTP_sender_thread(data['email'], 'Mushroomyan OTP', 'OTP : '+str(OTP_maker))
                 # new customer saved
 
                 result['status'] = HTTP_200_OK
