@@ -17,7 +17,8 @@
 }
 
 .headline{
-	font-style: Curlz MT;
+	font-family: Curlz MT;
+	font-size: 18px;
 	float: left;
 	display: inline-block;
 	margin-left: 60px;

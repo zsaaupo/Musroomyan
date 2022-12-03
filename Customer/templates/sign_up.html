@@ -1,0 +1,57 @@
+{% extends "layout/base.html" %}
+{% block title %} Join Mushroomyan {% endblock %}
+{% block body %}
+<br>
+<br>
+<h1>Join Mushroomyan</h1>
+<br>
+<div class="form_body" style="text-align: center;">
+	<form enctype="multipart/form-data" id="sign_up_form" method="POST">
+		{% csrf_token %}
+		<label for="full_name">Full name</label>
+		<input required type="text" name="full_name" placeholder="Full Name"><br><br>
+		<label for="email">Email</label>
+		<input required title="Please give a valide Email" type="text" name="email" placeholder="Ex: abc@xyz.com" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"><br><br>
+		<label for="gender">Gender</label>
+		<select>
+			<option value="Male">Male</option>
+			<option value="Female">Female</option>
+		</select><br><br>
+		<label for="phone_number">Phone Number</label>
+		<input required type="text" name="phone_number" placeholder="Ex: +8801577777777" value="+88"><br><br>
+		<label for="address">Address</label>
+		<textarea required name="address" placeholder="Please give you presenct address in details"></textarea><br><br>
+		<label for="password">Password</label>
+		<input required type="password" name="password" placeholder="Please make a unique password"><br><br>
+	</form>
+	<div>
+		<button type="submit">
+			Sign Up
+		</button>
+	</div>
+</div>
+{% endblock %}
+
+<script>
+	$('#sign_up_form').submit(function(event){
+		event.preventDefault()
+		var form_data = new FormData(document.getElementById('sign_up_form'));
+		$ajax({
+			type:"POST",
+			header: {"X-CSRFToken": '{{csrf_token}}'},
+			enctype: 'multipart/form-data',
+			processData: false,
+			async: false,
+			cache: false,
+			contentType: false,
+			url : "http://127.0.0.1:8000/customer/sign_up_API/",
+			data: form_data,
+			success: function(value){
+				$(.form_body).html(`success`)
+			},
+			error: function(error_massage){
+				console.log(error_massage)
+			}
+		});
+	})
+</script>

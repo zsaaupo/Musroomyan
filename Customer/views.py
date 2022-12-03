@@ -22,6 +22,13 @@ from threading import Thread
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+def sing_up(request):
+    return render(request, "sign_up.html")
+
+
+#rest APIs
+
+
 def OTP_sender(to, subject, body):
     sender_email = 'django2077@gmail.com'
 

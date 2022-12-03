@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import SignUpAPI, OTPCheckingAPI, SignInAPI
+from .views import SignUpAPI, OTPCheckingAPI, SignInAPI, sing_up
 urlpatterns = [
+
+    path('sign_up/', sing_up),
 
     #API
     path('sign_up_API/', SignUpAPI.as_view()),
